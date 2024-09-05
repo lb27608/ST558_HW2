@@ -1,0 +1,114 @@
+---
+title: "ST558 Homework 2"
+subtitle: "Lee Bennett"
+format: html
+editor: visual
+---
+
+## Task 1: Vectors
+
+First, we'll create vectors to contain the blood pressure data from before treatment and after treatment, labeling each measurement by subject number:
+
+```{r}
+pre_bp <- c( 120, 151, 125, 126, 115, 132, 132, 129, 134, 139, 127, 122, 127, 135, 133, 128, 147, 138, 140, 132)
+
+post_bp <- c(127, 145, 135, 122, 115, 122, 123, 126, 126, 129, 132, 146, 120, 114, 121, 120, 128, 120, 133, 115)
+
+patients<-paste("Subject", 1:20, sep = "_")
+
+names(pre_bp)<-patients
+names(post_bp)<-patients
+```
+
+Next, let's calculate the change in blood pressure after treatment and compute the mean change across all subjects (pre-treatment minus post-treatment):
+
+```{r}
+diff_bp <- pre_bp-post_bp
+diff_bp
+
+mean(diff_bp)
+```
+
+We see that the average change in systolic blood pressure is a decrease of 5.65 mm Hg.
+
+Next, we'll create a subset of the subjects who experienced a decrease in blood pressure and compute the average decrease in this subset:
+
+```{r}
+bp_decrease<-which(diff_bp>0)
+bp_decrease_vals<-diff_bp[bp_decrease]
+bp_decrease_vals
+mean(bp_decrease_vals)
+```
+
+We can see that if we restrict to only those subjects whose blood pressure improved after treatment, the average decrease is 10.6 mm Hg.
+
+## Task 2: Data Frames
+
+For this task, we'll create a data frame containing the blood pressure data for each patient:
+
+```{r}
+bp_data <- data.frame(patients,pre_bp,post_bp,diff_bp)
+head(bp_data)
+```
+
+Let's select only the observations where the blood pressure change is negative:
+
+```{r}
+`[`(bp_data,bp_data$diff_bp<0,1:4,drop=FALSE)
+```
+
+Finally, we create a logical variable called `bp_normal` to flag those observations where the post-treatment blood pressure is less than 120 mm Hg. The final data frame appears below.
+
+```{r}
+bp_data$bp_normal <- bp_data$post_bp<120
+knitr::kable(bp_data)
+```
+
+## Task 3: Lists
+
+Next, we'll create a data frame similar to the one above containing data from a similar experiment where the intervention was placebo instead of an active treatment:
+
+```{r}
+patients_p <- paste("Subject", 1:10, sep = "_")
+pre_bp_p <- c(138, 135, 147, 117, 152, 134, 114, 121, 131, 130)
+post_bp_p <- c(105, 136, 123, 130, 134, 143, 135, 139, 120, 124)
+diff_bp_p <- pre_bp_p-post_bp_p
+bp_normal_p <- post_bp_p<120
+
+bp_data_p <- data.frame(patients_p,pre_bp_p,post_bp_p,diff_bp_p,bp_normal_p)
+bp_data_p
+```
+
+We can now create a list that contains the original data frame with active treatment and the new data frame from placebo intervention as the two elements, named `treatment` and `placebo`, respectively:
+
+```{r}
+study_list <- list(treatment=bp_data, placebo=bp_data_p)
+study_list
+```
+
+If we would like to access the first element in this list, we can accomplish that in a few different ways:
+
+**1.  Using an explicit subscript to return the list element:**
+
+```{r}
+study_list[1]
+```
+
+**2.  Using double brackets to return a data frame:**
+
+```{r}
+study_list[[1]]
+```
+
+**3.  Using the name of the list element:**
+
+```{r}
+study_list$treatment
+```
+
+Finally, we can access the `pre_bp` column of the second data frame using one line of code to return a vector:
+
+```{r}
+study_list$placebo$pre_bp
+```
+
